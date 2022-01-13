@@ -27,10 +27,10 @@ public class GenreController {
     private IGenreService iGenreService;
 
     @GetMapping(value = "")
-    public ResponseEntity<?> getAll() {
+    public ResponseEntity<List<GenreDTO>> getAll() {
         List<GenreDTO> genresDTO = iGenreService.getAll();
 
-        ResponseEntity<?> response;
+        ResponseEntity<List<GenreDTO>> response;
 
         if (!genresDTO.isEmpty()) {
             response = new ResponseEntity<>(genresDTO, HttpStatus.OK);
@@ -42,13 +42,13 @@ public class GenreController {
     }
 
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody GenreDTO gDTO) {
+    public ResponseEntity<GenreDTO> save(@RequestBody GenreDTO gDTO) {
         GenreDTO genreSaved = iGenreService.save(gDTO);
         return new ResponseEntity<>(genreSaved, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<?> edit(@RequestBody GenreDTO genreDTO, @PathVariable Long id) {
+    public ResponseEntity<GenreDTO> edit(@RequestBody GenreDTO genreDTO, @PathVariable Long id) {
         GenreDTO dtoEdited = iGenreService.edit(id, genreDTO);
         return new ResponseEntity<>(dtoEdited, HttpStatus.OK);
     }
