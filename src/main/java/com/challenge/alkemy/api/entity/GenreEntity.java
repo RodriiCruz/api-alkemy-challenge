@@ -1,5 +1,6 @@
 package com.challenge.alkemy.api.entity;
 
+import java.io.Serializable;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,7 +22,7 @@ import lombok.Setter;
 @Getter
 @Entity
 @Table(name = "genres")
-public class GenreEntity {
+public class GenreEntity implements Serializable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
