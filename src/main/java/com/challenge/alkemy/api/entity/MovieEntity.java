@@ -12,10 +12,13 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  *
@@ -40,10 +43,13 @@ public class MovieEntity {
 
     @NotNull
     @Temporal(TemporalType.DATE)
+    @DateTimeFormat(pattern = "yyyy/MM/dd")
     @Column(name = "creation_date")
     private Date creationDate;
 
     @NotNull
+    @Min(value = 1 , message = "Calificación fuera de rango (1-5)")
+    @Max(value = 5 , message = "Calificación fuera de rango (1-5)")
     private Integer qualification;
 
     @NotNull
