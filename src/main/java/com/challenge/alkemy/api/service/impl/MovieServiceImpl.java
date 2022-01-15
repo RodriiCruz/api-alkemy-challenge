@@ -35,7 +35,7 @@ public class MovieServiceImpl implements IMovieService {
 
     @Transactional
     @Override
-    public MovieDTO save(NewMovieDTO movieDTO) throws NotFoundException {
+    public MovieDTO save(NewMovieDTO movieDTO) {
 
         MovieEntity movie = movieMapper.newMovieDTO2Entity(movieDTO);
 
@@ -50,7 +50,6 @@ public class MovieServiceImpl implements IMovieService {
     @Override
     public MovieDTO edit(Long id, NewMovieDTO movieDTO) throws NotFoundException {
 
-        if (id != null) {
             Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
 
             if (respuesta.isPresent()) {
@@ -78,16 +77,12 @@ public class MovieServiceImpl implements IMovieService {
             } else {
                 throw new NotFoundException("No existe la pelicula o serie que desea modificar");
             }
-        } else {
-            throw new NotFoundException("Debe ingresar el id de la pelicula o serie que desea modificar");
-        }
     }
 
     @Transactional
     @Override
     public void delete(Long id) throws NotFoundException {
 
-        if (id != null) {
             Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
 
             if (respuesta.isPresent()) {
@@ -95,9 +90,6 @@ public class MovieServiceImpl implements IMovieService {
             } else {
                 throw new NotFoundException("No existe la pelicula o serie que desea borrar");
             }
-        } else {
-            throw new NotFoundException("Debe ingresar el id de la pelicula o serie que desea borrar");
-        }
     }
 
     @Transactional(readOnly = true)
@@ -118,7 +110,6 @@ public class MovieServiceImpl implements IMovieService {
     @Transactional(readOnly = true)
     @Override
     public MovieDTO findById(Long id) throws NotFoundException {
-        if (id != null) {
 
             Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
 
@@ -131,8 +122,5 @@ public class MovieServiceImpl implements IMovieService {
             } else {
                 throw new NotFoundException("No existe la pelicula o serie que desea ver");
             }
-        } else {
-            throw new NotFoundException("Debe ingresar el id de la pelicula o serie para ver su detalle");
-        }
     }
 }

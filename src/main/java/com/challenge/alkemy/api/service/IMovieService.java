@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface IMovieService {
 
-    MovieDTO save(NewMovieDTO movieDTO) throws NotFoundException;
+    MovieDTO save(NewMovieDTO movieDTO);
 
     MovieDTO edit(Long id, NewMovieDTO movieDTO) throws NotFoundException;
 

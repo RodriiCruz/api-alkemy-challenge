@@ -40,30 +40,25 @@ public class GenreServiceImpl implements IGenreService {
     @Transactional
     @Override
     public GenreDTO edit(Long id, GenreDTO genreDTO) throws NotFoundException {
-        if (id != null) {
-            Optional<GenreEntity> result = iGenreRepository.findById(id);
+        Optional<GenreEntity> result = iGenreRepository.findById(id);
 
-            if (result.isPresent()) {
-                GenreEntity genre = result.get();
-                genre.setImage(genreDTO.getImage());
-                genre.setName(genreDTO.getName());
+        if (result.isPresent()) {
+            GenreEntity genre = result.get();
+            genre.setImage(genreDTO.getImage());
+            genre.setName(genreDTO.getName());
 
-                GenreEntity genreSaved = iGenreRepository.save(genre);
+            GenreEntity genreSaved = iGenreRepository.save(genre);
 
-                GenreDTO dto = genreMapper.genreEntity2DTO(genreSaved);
-                return dto;
-            } else {
-                throw new NotFoundException("No existe el genero que desea modificar");
-            }
+            GenreDTO dto = genreMapper.genreEntity2DTO(genreSaved);
+            return dto;
         } else {
-            throw new NotFoundException("Debe ingresar el id del genero que desea modificar");
+            throw new NotFoundException("No existe el genero que desea modificar");
         }
     }
 
     @Transactional
     @Override
     public void delete(Long id) throws NotFoundException {
-        if (id != null) {
 
             Optional<GenreEntity> respuesta = iGenreRepository.findById(id);
 
@@ -74,9 +69,6 @@ public class GenreServiceImpl implements IGenreService {
             } else {
                 throw new NotFoundException("No existe el genero que desea borrar");
             }
-        } else {
-            throw new NotFoundException("Debe ingresar el id del genero que desea borrar");
-        }
     }
 
     @Transactional(readOnly = true)
