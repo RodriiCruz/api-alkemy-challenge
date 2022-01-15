@@ -9,12 +9,15 @@ import org.springframework.transaction.annotation.Transactional;
 import com.challenge.alkemy.api.dto.CharacterDTO;
 import com.challenge.alkemy.api.dto.GetCharacterDTO;
 import com.challenge.alkemy.api.dto.NewCharacterDTO;
+import com.challenge.alkemy.api.dto.filters.CharacterFiltersDTO;
 import com.challenge.alkemy.api.entity.CharacterEntity;
 import com.challenge.alkemy.api.entity.MovieEntity;
 import com.challenge.alkemy.api.exception.NotFoundException;
 import com.challenge.alkemy.api.mapper.CharacterMapper;
 import com.challenge.alkemy.api.repository.ICharacterRepository;
+import com.challenge.alkemy.api.repository.specifications.CharacterSpecification;
 import com.challenge.alkemy.api.service.ICharacterService;
+import java.util.Set;
 
 /**
  *
@@ -24,10 +27,13 @@ import com.challenge.alkemy.api.service.ICharacterService;
 public class CharacterServiceImpl implements ICharacterService {
 
     @Autowired
-    private ICharacterRepository iCharacterRepository;
+    private ICharacterRepository characterRepository;
 
     @Autowired
     private CharacterMapper characterMapper;
+    
+    @Autowired
+    private CharacterSpecification characterSpecification;
 
     @Transactional
     @Override
@@ -35,7 +41,7 @@ public class CharacterServiceImpl implements ICharacterService {
 
         CharacterEntity character = characterMapper.newCharacterDto2Entity(newCharacter);
 
-        CharacterEntity characterSaved = iCharacterRepository.save(character);
+        CharacterEntity characterSaved = characterRepository.save(character);
 
         CharacterDTO dto = characterMapper.characterEntity2DTO(characterSaved);
 
@@ -46,7 +52,7 @@ public class CharacterServiceImpl implements ICharacterService {
     @Override
     public CharacterDTO edit(Long id, NewCharacterDTO newCharacter) throws NotFoundException {
 
-        Optional<CharacterEntity> respuesta = iCharacterRepository.findById(id);
+        Optional<CharacterEntity> respuesta = characterRepository.findById(id);
 
         if (respuesta.isPresent()) {
 
@@ -72,7 +78,7 @@ public class CharacterServiceImpl implements ICharacterService {
 
             character.setMovies(newMovies);
 
-            CharacterEntity characterSaved = iCharacterRepository.save(character);
+            CharacterEntity characterSaved = characterRepository.save(character);
 
             CharacterDTO dto = characterMapper.characterEntity2DTO(characterSaved);
 
@@ -86,7 +92,7 @@ public class CharacterServiceImpl implements ICharacterService {
     @Override
     public void delete(Long id) throws NotFoundException {
 
-        Optional<CharacterEntity> result = iCharacterRepository.findById(id);
+        Optional<CharacterEntity> result = characterRepository.findById(id);
 
         if (result.isPresent()) {
             CharacterEntity c = result.get();
@@ -95,7 +101,7 @@ public class CharacterServiceImpl implements ICharacterService {
                 movie.getCharacters().remove(c);
             }
 
-            iCharacterRepository.deleteById(id);
+            characterRepository.deleteById(id);
         } else {
             throw new NotFoundException("No existe el personaje que desea borrar");
         }
@@ -105,7 +111,7 @@ public class CharacterServiceImpl implements ICharacterService {
     @Override
     public CharacterDTO getCharacter(Long id) throws NotFoundException {
 
-        Optional<CharacterEntity> result = iCharacterRepository.findById(id);
+        Optional<CharacterEntity> result = characterRepository.findById(id);
 
         if (result.isPresent()) {
 
@@ -123,7 +129,7 @@ public class CharacterServiceImpl implements ICharacterService {
     @Override
     public List<GetCharacterDTO> getAll() {
 
-        List<CharacterEntity> characters = iCharacterRepository.findAll();
+        List<CharacterEntity> characters = characterRepository.findAll();
 
         List<GetCharacterDTO> charactersDTO = new ArrayList<>();
 
@@ -134,5 +140,22 @@ public class CharacterServiceImpl implements ICharacterService {
         }
 
         return charactersDTO;
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<CharacterDTO> getByFilters(String name, Integer age, Double weight, Set<Long> idMovie) {
+        CharacterFiltersDTO filters = new CharacterFiltersDTO(name, age, weight, idMovie);
+        
+        List<CharacterEntity> characters = characterRepository.findAll(characterSpecification.getByFilters(filters));
+        
+        List<CharacterDTO> dtos = new ArrayList<>();
+        
+        for (CharacterEntity entity : characters) {
+            CharacterDTO c = characterMapper.characterEntity2DTO(entity);
+            dtos.add(c);
+        }
+        
+        return dtos;
     }
 }
