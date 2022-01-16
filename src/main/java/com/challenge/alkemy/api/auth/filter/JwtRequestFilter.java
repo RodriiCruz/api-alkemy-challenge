@@ -31,13 +31,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-
+    
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         final String authorizationHeader = request.getHeader("Authorization");
 
-        String jwt = authorizationHeader.substring(7);
-        String username = jwtUtils.extractUsername(jwt);
+        String jwt = null;
+        String username = null;
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
