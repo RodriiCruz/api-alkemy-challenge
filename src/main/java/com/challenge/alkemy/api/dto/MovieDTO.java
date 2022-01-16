@@ -1,5 +1,6 @@
 package com.challenge.alkemy.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.List;
 import lombok.Getter;
@@ -19,5 +20,7 @@ public class MovieDTO {
     private Date creationDate;
     private Integer qualification;
     private GenreDTO genre;
+    @JsonIgnore
+    private Long idGenre;
     private List<GetCharacterDTO> characters;
 }

@@ -3,6 +3,7 @@ package com.challenge.alkemy.api.service.impl;
 import com.challenge.alkemy.api.dto.GetMovieDTO;
 import com.challenge.alkemy.api.dto.MovieDTO;
 import com.challenge.alkemy.api.dto.NewMovieDTO;
+import com.challenge.alkemy.api.dto.filters.MovieFiltersDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import com.challenge.alkemy.api.exception.NotFoundException;
 import com.challenge.alkemy.api.mapper.MovieMapper;
 import com.challenge.alkemy.api.repository.IGenreRepository;
 import com.challenge.alkemy.api.repository.IMovieRepository;
+import com.challenge.alkemy.api.repository.specifications.MovieSpecification;
 import com.challenge.alkemy.api.service.IMovieService;
 
 /**
@@ -33,6 +35,9 @@ public class MovieServiceImpl implements IMovieService {
     @Autowired
     private MovieMapper movieMapper;
 
+    @Autowired
+    private MovieSpecification movieSpecification;
+
     @Transactional
     @Override
     public MovieDTO save(NewMovieDTO movieDTO) {
@@ -50,46 +55,46 @@ public class MovieServiceImpl implements IMovieService {
     @Override
     public MovieDTO edit(Long id, NewMovieDTO movieDTO) throws NotFoundException {
 
-            Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
+        Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
+
+        if (respuesta.isPresent()) {
+
+            MovieEntity movie = respuesta.get();
+
+            movie.setImage(movieDTO.getImage());
+            movie.setTitle(movieDTO.getTitle());
+            movie.setCreationDate(movieDTO.getCreationDate());
+            movie.setQualification(movieDTO.getQualification());
+            movie.setCharacters(movieMapper.findCharactersById(movieDTO.getCharacters()));
+
+            Optional<GenreEntity> respuestaGenero = iGenreRepository.findById(movieDTO.getIdGenre());
 
             if (respuesta.isPresent()) {
-
-                MovieEntity movie = respuesta.get();
-
-                movie.setImage(movieDTO.getImage());
-                movie.setTitle(movieDTO.getTitle());
-                movie.setCreationDate(movieDTO.getCreationDate());
-                movie.setQualification(movieDTO.getQualification());
-                movie.setCharacters(movieMapper.findCharactersById(movieDTO.getCharacters()));
-
-                Optional<GenreEntity> respuestaGenero = iGenreRepository.findById(movieDTO.getIdGenre());
-
-                if (respuesta.isPresent()) {
-                    GenreEntity genre = respuestaGenero.get();
-                    movie.setGenre(genre);
-                } else {
-                    throw new NotFoundException("No existe el genero ingresado");
-                }
-
-                MovieDTO dto = movieMapper.movieEntity2DTO(movie);
-
-                return dto;
+                GenreEntity genre = respuestaGenero.get();
+                movie.setGenre(genre);
             } else {
-                throw new NotFoundException("No existe la pelicula o serie que desea modificar");
+                throw new NotFoundException("No existe el genero ingresado");
             }
+
+            MovieDTO dto = movieMapper.movieEntity2DTO(movie);
+
+            return dto;
+        } else {
+            throw new NotFoundException("No existe la pelicula o serie que desea modificar");
+        }
     }
 
     @Transactional
     @Override
     public void delete(Long id) throws NotFoundException {
 
-            Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
+        Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
 
-            if (respuesta.isPresent()) {
-                iMovieRepository.deleteById(id);
-            } else {
-                throw new NotFoundException("No existe la pelicula o serie que desea borrar");
-            }
+        if (respuesta.isPresent()) {
+            iMovieRepository.deleteById(id);
+        } else {
+            throw new NotFoundException("No existe la pelicula o serie que desea borrar");
+        }
     }
 
     @Transactional(readOnly = true)
@@ -111,16 +116,32 @@ public class MovieServiceImpl implements IMovieService {
     @Override
     public MovieDTO findById(Long id) throws NotFoundException {
 
-            Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
+        Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
 
-            if (respuesta.isPresent()) {
-                MovieEntity movie = respuesta.get();
-                MovieDTO dto = movieMapper.movieEntity2DTO(movie);
+        if (respuesta.isPresent()) {
+            MovieEntity movie = respuesta.get();
+            MovieDTO dto = movieMapper.movieEntity2DTO(movie);
 
-                return dto;
+            return dto;
 
-            } else {
-                throw new NotFoundException("No existe la pelicula o serie que desea ver");
-            }
+        } else {
+            throw new NotFoundException("No existe la pelicula o serie que desea ver");
+        }
+    }
+
+    @Override
+    public List<MovieDTO> getByFilters(String title, Long idGenre, String order) throws NotFoundException {
+        MovieFiltersDTO filters = new MovieFiltersDTO(title, idGenre, order);
+
+        List<MovieEntity> movies = iMovieRepository.findAll(movieSpecification.getByFilters(filters));
+
+        List<MovieDTO> dtos = new ArrayList<>();
+
+        for (MovieEntity entity : movies) {
+            MovieDTO m = movieMapper.movieEntity2DTO(entity);
+            dtos.add(m);
+        }
+
+        return dtos;
     }
 }

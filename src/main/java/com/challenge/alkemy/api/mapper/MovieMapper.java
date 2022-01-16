@@ -48,6 +48,7 @@ public class MovieMapper {
         if (result.isPresent()) {
             GenreEntity genre = result.get();
             movie.setGenre(genre);
+            movie.setIdGenre(movieDTO.getIdGenre());
         } else {
             throw new NotFoundException("No existe el genero ingresado");
         }
@@ -67,6 +68,7 @@ public class MovieMapper {
         List<GetCharacterDTO> listCharacters = new ArrayList<>();
         for (CharacterEntity character : movie.getCharacters()) {
 
+            //TODO usar mapper de characters
             GetCharacterDTO characterDTO = new GetCharacterDTO();
 
             characterDTO.setImage(character.getImage());

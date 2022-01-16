@@ -21,4 +21,6 @@ public interface IMovieService {
     List<GetMovieDTO> getAll();
 
     MovieDTO findById(Long id) throws NotFoundException;
+    
+    List<MovieDTO> getByFilters(String title, Long idGenre, String order);
 }

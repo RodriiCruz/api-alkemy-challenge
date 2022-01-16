@@ -55,6 +55,7 @@ public class MovieEntity {
     @NotNull
     @OneToOne
     private GenreEntity genre;
+    private Long idGenre;
 
     @ManyToMany
     private List<CharacterEntity> characters;
