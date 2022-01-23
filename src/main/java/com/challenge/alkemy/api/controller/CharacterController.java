@@ -49,7 +49,7 @@ public class CharacterController {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<CharacterDTO> edit(@RequestBody NewCharacterDTO newCharacter, @PathVariable Long id) {
+    public ResponseEntity<CharacterDTO> edit(@Valid @RequestBody NewCharacterDTO newCharacter, @PathVariable Long id) {
         CharacterDTO character = characterService.edit(id, newCharacter);
         return new ResponseEntity<>(character, HttpStatus.OK);
     }
@@ -62,14 +62,8 @@ public class CharacterController {
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<CharacterDTO> getCharacter(@PathVariable("id") Long id) {
-
         CharacterDTO character = characterService.getCharacter(id);
-
-        if (character != null) {
-            return new ResponseEntity<>(character, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
+        return new ResponseEntity<>(character, HttpStatus.OK);
     }
 
     @GetMapping(value = "/find-by")
