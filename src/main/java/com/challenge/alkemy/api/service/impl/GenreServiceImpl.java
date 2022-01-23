@@ -2,6 +2,7 @@ package com.challenge.alkemy.api.service.impl;
 
 import com.challenge.alkemy.api.dto.GenreDTO;
 import com.challenge.alkemy.api.entity.GenreEntity;
+import com.challenge.alkemy.api.exception.AlreadyExistsException;
 import com.challenge.alkemy.api.exception.NotFoundException;
 import com.challenge.alkemy.api.mapper.GenreMapper;
 import com.challenge.alkemy.api.repository.IGenreRepository;
@@ -28,6 +29,11 @@ public class GenreServiceImpl implements IGenreService {
     @Transactional
     @Override
     public GenreDTO save(GenreDTO genreDTO) {
+        Optional<GenreEntity> result = iGenreRepository.findByName(genreDTO.getName());
+        if (result.isPresent()) {
+            throw new AlreadyExistsException("El genero " + genreDTO.getName() + " ya se encuentra cargado");
+        }
+        
         GenreEntity genre = genreMapper.genreDTO2Entity(genreDTO);
 
         GenreEntity genreSaved = iGenreRepository.save(genre);
@@ -52,22 +58,19 @@ public class GenreServiceImpl implements IGenreService {
             GenreDTO dto = genreMapper.genreEntity2DTO(genreSaved);
             return dto;
         } else {
-            throw new NotFoundException("No existe el genero que desea modificar");
+            throw new NotFoundException("No existe ningún genero con el id ingresado");
         }
     }
 
     @Transactional
     @Override
     public void delete(Long id) throws NotFoundException {
-
             Optional<GenreEntity> respuesta = iGenreRepository.findById(id);
 
             if (respuesta.isPresent()) {
-
                 iGenreRepository.deleteById(id);
-
             } else {
-                throw new NotFoundException("No existe el genero que desea borrar");
+                throw new NotFoundException("No existe ningún genero con el id ingresado");
             }
     }
 
