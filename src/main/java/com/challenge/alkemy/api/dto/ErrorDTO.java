@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 public class ErrorDTO {
     
     private HttpStatus status;
+    private String type;
     private List<String> errors;
     
 }

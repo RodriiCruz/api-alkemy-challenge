@@ -31,7 +31,7 @@ public class UserAuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<AuthenticationResponse> signIn(@RequestBody AuthenticationRequest authRequest) throws Exception {
+    public ResponseEntity<AuthenticationResponse> signIn(@Valid @RequestBody AuthenticationRequest authRequest) throws Exception {
         final String jwt = userDetailsCustomService.signin(authRequest);
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }

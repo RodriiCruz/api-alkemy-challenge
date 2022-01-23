@@ -4,11 +4,14 @@ import com.challenge.alkemy.api.auth.dto.AuthenticationRequest;
 import com.challenge.alkemy.api.auth.dto.UserDTO;
 import com.challenge.alkemy.api.auth.entity.UserEntity;
 import com.challenge.alkemy.api.auth.repository.IUserRepository;
+import com.challenge.alkemy.api.exception.AlreadyExistsException;
 import java.util.Collections;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
@@ -29,7 +32,6 @@ public class UserDetailsCustomService implements UserDetailsService {
     private IUserRepository userRepository;
     private JwtUtils jwtUtils;
     private AuthenticationManager authenticationManager;
-    
 
     @Autowired
     public void setAttributes(IUserRepository userRepository, JwtUtils jwtUtils, @Lazy AuthenticationManager authenticationManager, @Lazy PasswordEncoder passwordEncoder) {
@@ -41,25 +43,26 @@ public class UserDetailsCustomService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity userEntity = userRepository.findByUsername(username);
-
-        if (userEntity == null) {
-            throw new UsernameNotFoundException("No se ha encotrado el usuario ingresado");
-        }
-        return new User(userEntity.getUsername(), userEntity.getPassword(), Collections.emptyList());
+        Optional<UserEntity> userEntity = userRepository.findByUsername(username);
+        return new User(userEntity.get().getUsername(), userEntity.get().getPassword(), Collections.emptyList());
     }
 
     public void save(UserDTO userDTO) {
+        Optional<UserEntity> userEntity = userRepository.findByUsername(userDTO.getUsername());
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(userDTO.getUsername());
-        userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        if (userEntity.isPresent()) {
+            throw new AlreadyExistsException("El mail ingresado ya se encuentra registrado");
+        }
 
-        userRepository.save(userEntity);
+        UserEntity registeredUser = new UserEntity();
+
+        registeredUser.setUsername(userDTO.getUsername());
+        registeredUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+
+        userRepository.save(registeredUser);
     }
 
     public String signin(AuthenticationRequest authRequest) throws Exception {
-
         UserDetails userDetails;
 
         try {
@@ -71,7 +74,9 @@ public class UserDetailsCustomService implements UserDetailsService {
 
             return jwtUtils.generateToken(userDetails);
         } catch (BadCredentialsException e) {
-            throw new Exception("Usuario o contraseña incorrectos", e);
+            throw new BadCredentialsException("Usuario o contraseña incorrectos");
+        } catch (InternalAuthenticationServiceException e){
+            throw new InternalAuthenticationServiceException("El usuario ingresado no existe");
         }
     }
 }

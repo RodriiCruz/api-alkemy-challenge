@@ -2,8 +2,6 @@
 package com.challenge.alkemy.api.controller;
 
 import com.challenge.alkemy.api.dto.ErrorDTO;
-import com.challenge.alkemy.api.exception.AlreadyExistsException;
-import com.challenge.alkemy.api.exception.NotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,26 +22,17 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {NotFoundException.class})
-    protected ResponseEntity<Object> handleParamNotFound(RuntimeException ex, WebRequest request) {
+    @ExceptionHandler(value = {Exception.class})
+    protected ResponseEntity<Object> handleException(RuntimeException ex, WebRequest request) {
         ErrorDTO errorDTO = new ErrorDTO(
                 HttpStatus.BAD_REQUEST,
+                ex.getClass().getName(),
                 Arrays.asList(ex.getMessage())
         );
 
         return handleExceptionInternal(ex, errorDTO, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
     
-    @ExceptionHandler(value = {AlreadyExistsException.class})
-    protected ResponseEntity<Object> handleAlreadyExists(RuntimeException ex, WebRequest request) {
-        ErrorDTO errorDTO = new ErrorDTO(
-                HttpStatus.BAD_REQUEST,
-                Arrays.asList(ex.getMessage())
-        );
-
-        return handleExceptionInternal(ex, errorDTO, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
-    }
-
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
@@ -59,6 +48,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         
         ErrorDTO errorDTO = new ErrorDTO(
                 HttpStatus.BAD_REQUEST,
+                ex.getClass().getName(),
                 errors);
 
         return handleExceptionInternal(ex, errorDTO, headers, errorDTO.getStatus(), request);
