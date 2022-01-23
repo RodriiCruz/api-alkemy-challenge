@@ -6,6 +6,7 @@ import com.challenge.alkemy.api.dto.NewCharacterDTO;
 import com.challenge.alkemy.api.service.ICharacterService;
 import java.util.List;
 import java.util.Set;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,7 @@ public class CharacterController {
     }
 
     @PostMapping
-    public ResponseEntity<CharacterDTO> save(@RequestBody NewCharacterDTO newCharacter) {
+    public ResponseEntity<CharacterDTO> save(@Valid @RequestBody NewCharacterDTO newCharacter) {
         CharacterDTO character = characterService.save(newCharacter);
         return new ResponseEntity<>(character, HttpStatus.CREATED);
     }

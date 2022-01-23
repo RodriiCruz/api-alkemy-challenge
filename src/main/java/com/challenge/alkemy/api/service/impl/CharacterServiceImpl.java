@@ -12,6 +12,7 @@ import com.challenge.alkemy.api.dto.NewCharacterDTO;
 import com.challenge.alkemy.api.dto.filters.CharacterFiltersDTO;
 import com.challenge.alkemy.api.entity.CharacterEntity;
 import com.challenge.alkemy.api.entity.MovieEntity;
+import com.challenge.alkemy.api.exception.AlreadyExistsException;
 import com.challenge.alkemy.api.exception.NotFoundException;
 import com.challenge.alkemy.api.mapper.CharacterMapper;
 import com.challenge.alkemy.api.repository.ICharacterRepository;
@@ -31,7 +32,7 @@ public class CharacterServiceImpl implements ICharacterService {
 
     @Autowired
     private CharacterMapper characterMapper;
-    
+
     @Autowired
     private CharacterSpecification characterSpecification;
 
@@ -39,6 +40,11 @@ public class CharacterServiceImpl implements ICharacterService {
     @Override
     public CharacterDTO save(NewCharacterDTO newCharacter) {
 
+        Optional<CharacterEntity> result = characterRepository.findByName(newCharacter.getName());
+        if (result.isPresent()) {
+            throw new AlreadyExistsException("El personaje " + newCharacter.getName() + " ya se encuentra cargado");
+        }
+        
         CharacterEntity character = characterMapper.newCharacterDto2Entity(newCharacter);
 
         CharacterEntity characterSaved = characterRepository.save(character);
@@ -84,7 +90,7 @@ public class CharacterServiceImpl implements ICharacterService {
 
             return dto;
         } else {
-            throw new NotFoundException("No existe el personaje que desea modificar");
+            throw new NotFoundException("No existe ningun personaje con el id ingresado");
         }
     }
 
@@ -103,7 +109,7 @@ public class CharacterServiceImpl implements ICharacterService {
 
             characterRepository.deleteById(id);
         } else {
-            throw new NotFoundException("No existe el personaje que desea borrar");
+            throw new NotFoundException("No existe ningun personaje con el id ingresado");
         }
     }
 
@@ -121,7 +127,7 @@ public class CharacterServiceImpl implements ICharacterService {
 
             return dto;
         } else {
-            throw new NotFoundException("No existe el personaje que desea ver");
+            throw new NotFoundException("No existe ningun personaje con el id ingresado");
         }
     }
 
@@ -146,16 +152,16 @@ public class CharacterServiceImpl implements ICharacterService {
     @Override
     public List<CharacterDTO> getByFilters(String name, Integer age, Double weight, Set<Long> idMovie) {
         CharacterFiltersDTO filters = new CharacterFiltersDTO(name, age, weight, idMovie);
-        
+
         List<CharacterEntity> characters = characterRepository.findAll(characterSpecification.getByFilters(filters));
-        
+
         List<CharacterDTO> dtos = new ArrayList<>();
-        
+
         for (CharacterEntity entity : characters) {
             CharacterDTO c = characterMapper.characterEntity2DTO(entity);
             dtos.add(c);
         }
-        
+
         return dtos;
     }
 }
