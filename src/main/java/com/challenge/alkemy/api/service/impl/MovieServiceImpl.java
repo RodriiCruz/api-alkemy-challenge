@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.challenge.alkemy.api.entity.GenreEntity;
 import com.challenge.alkemy.api.entity.MovieEntity;
+import com.challenge.alkemy.api.exception.AlreadyExistsException;
 import com.challenge.alkemy.api.exception.NotFoundException;
 import com.challenge.alkemy.api.mapper.MovieMapper;
 import com.challenge.alkemy.api.repository.IGenreRepository;
@@ -41,6 +42,11 @@ public class MovieServiceImpl implements IMovieService {
     @Transactional
     @Override
     public MovieDTO save(NewMovieDTO movieDTO) {
+        
+        Optional<MovieEntity> result = iMovieRepository.findByTitle(movieDTO.getTitle());
+        if (result.isPresent()) {
+            throw new AlreadyExistsException("La pelicula/serie " + movieDTO.getTitle() + " ya se encuentra cargada");
+        }
 
         MovieEntity movie = movieMapper.newMovieDTO2Entity(movieDTO);
 
@@ -55,11 +61,11 @@ public class MovieServiceImpl implements IMovieService {
     @Override
     public MovieDTO edit(Long id, NewMovieDTO movieDTO) throws NotFoundException {
 
-        Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
+        Optional<MovieEntity> resultMovie = iMovieRepository.findById(id);
 
-        if (respuesta.isPresent()) {
+        if (resultMovie.isPresent()) {
 
-            MovieEntity movie = respuesta.get();
+            MovieEntity movie = resultMovie.get();
 
             movie.setImage(movieDTO.getImage());
             movie.setTitle(movieDTO.getTitle());
@@ -67,20 +73,20 @@ public class MovieServiceImpl implements IMovieService {
             movie.setQualification(movieDTO.getQualification());
             movie.setCharacters(movieMapper.findCharactersById(movieDTO.getCharacters()));
 
-            Optional<GenreEntity> respuestaGenero = iGenreRepository.findById(movieDTO.getIdGenre());
+            Optional<GenreEntity> resultGenre = iGenreRepository.findById(movieDTO.getIdGenre());
 
-            if (respuesta.isPresent()) {
-                GenreEntity genre = respuestaGenero.get();
+            if (resultGenre.isPresent()) {
+                GenreEntity genre = resultGenre.get();
                 movie.setGenre(genre);
             } else {
-                throw new NotFoundException("No existe el genero ingresado");
+                throw new NotFoundException("No existe ningun genero con el id ingresado");
             }
 
             MovieDTO dto = movieMapper.movieEntity2DTO(movie);
 
             return dto;
         } else {
-            throw new NotFoundException("No existe la pelicula o serie que desea modificar");
+            throw new NotFoundException("No existe ninguna pelicula/serie con el id ingresado");
         }
     }
 
@@ -88,12 +94,12 @@ public class MovieServiceImpl implements IMovieService {
     @Override
     public void delete(Long id) throws NotFoundException {
 
-        Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
+        Optional<MovieEntity> result = iMovieRepository.findById(id);
 
-        if (respuesta.isPresent()) {
+        if (result.isPresent()) {
             iMovieRepository.deleteById(id);
         } else {
-            throw new NotFoundException("No existe la pelicula o serie que desea borrar");
+            throw new NotFoundException("No existe ninguna pelicula/serie con el id ingresado");
         }
     }
 
@@ -116,16 +122,16 @@ public class MovieServiceImpl implements IMovieService {
     @Override
     public MovieDTO findById(Long id) throws NotFoundException {
 
-        Optional<MovieEntity> respuesta = iMovieRepository.findById(id);
+        Optional<MovieEntity> result = iMovieRepository.findById(id);
 
-        if (respuesta.isPresent()) {
-            MovieEntity movie = respuesta.get();
+        if (result.isPresent()) {
+            MovieEntity movie = result.get();
             MovieDTO dto = movieMapper.movieEntity2DTO(movie);
 
             return dto;
 
         } else {
-            throw new NotFoundException("No existe la pelicula o serie que desea ver");
+            throw new NotFoundException("No existe ninguna pelicula/serie con el id ingresado");
         }
     }
 

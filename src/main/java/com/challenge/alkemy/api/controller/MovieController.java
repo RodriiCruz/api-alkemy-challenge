@@ -5,6 +5,7 @@ import com.challenge.alkemy.api.dto.MovieDTO;
 import com.challenge.alkemy.api.dto.NewMovieDTO;
 import com.challenge.alkemy.api.service.IMovieService;
 import java.util.List;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,14 +41,14 @@ public class MovieController {
         }
     }
 
-    @PostMapping //TODO chequear si recibe un json incorrecto
-    public ResponseEntity<MovieDTO> save(@RequestBody NewMovieDTO movieDTO) {
+    @PostMapping
+    public ResponseEntity<MovieDTO> save(@Valid @RequestBody NewMovieDTO movieDTO) {
         MovieDTO movie = movieService.save(movieDTO);
         return new ResponseEntity<>(movie, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<MovieDTO> edit(@RequestBody NewMovieDTO movieDTO, @PathVariable Long id) {
+    public ResponseEntity<MovieDTO> edit(@Valid @RequestBody NewMovieDTO movieDTO, @PathVariable Long id) {
         MovieDTO movie = movieService.edit(id, movieDTO);
         return new ResponseEntity<>(movie, HttpStatus.OK);
     }
@@ -62,17 +63,9 @@ public class MovieController {
     public ResponseEntity findById(@PathVariable("id") Long id) {
         MovieDTO movie = movieService.findById(id);
 
-        ResponseEntity response;
-
-        if (movie != null) {
-            response = new ResponseEntity<>(movie, HttpStatus.OK);
-        } else {
-            response = new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        return response;
+        return new ResponseEntity<>(movie, HttpStatus.OK);
     }
-    
+
     @GetMapping(value = "/find-by")
     public ResponseEntity<List<MovieDTO>> getByFilters(
             @RequestParam(required = false) String title,
